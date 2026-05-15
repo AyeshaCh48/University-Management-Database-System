@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Student Portal - NUCES</title>
+    <style>
+        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #f4f7f6; }
+        header { background: #1a2a6c; color: white; padding: 25px 50px; font-size: 1.8rem; font-weight: bold; }
+        .sub-header { background: white; padding: 15px 50px; display: flex; justify-content: space-between; border-bottom: 1px solid #ddd; }
+        .main-layout { display: flex; height: calc(100vh - 145px); }
+        .sidebar { width: 260px; background: #1a2a6c; padding-top: 20px; }
+        .sidebar a { display: block; padding: 15px 25px; color: white; text-decoration: none; border-left: 4px solid transparent; }
+        .sidebar a:hover { background: #e6f0ff; color: #1a2a6c; border-left-color: #3498db; }
+        .content { flex: 1; padding: 40px; overflow-y: auto; }
+        .card { background: white; padding: 25px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { padding: 12px; border: 1px solid #ddd; text-align: left; }
+        th { background: #f8f9fa; color: #1a2a6c; }
+        .status-present { color: green; font-weight: bold; }
+        .status-absent { color: red; font-weight: bold; }
+        select { width: 100%; padding: 10px; margin: 10px 0; border-radius: 5px; border: 1px solid #ddd; }
+    </style>
+</head>
+<body>
+
+<header>National University of Computing and Emerging Sciences</header>
+<div class="sub-header">
+    <span>STUDENT ID: <strong>{{ session.ref_id }}</strong> | NAME: <strong>{{ session.username }}</strong></span>
+    <a href="/logout" style="color:red; font-weight:bold; text-decoration:none;">Logout</a>
+</div>
+
+<div class="main-layout">
+    <div class="sidebar">
+        <a href="{{ url_for('student_action', action='my_courses') }}">My Enrolled Courses</a>
+        <a href="{{ url_for('student_action', action='view_marks') }}">View Marks & Grades</a>
+        <a href="{{ url_for('student_action', action='view_attendance') }}">Attendance Report</a>
+        <a href="{{ url_for('student_action', action='upcoming_exams') }}">Upcoming Exams</a>
+    </div>
+
+    <div class="content">
+        {% if action == 'my_courses' %}
+        <div class="card">
+            <h2>Your Registered Courses</h2>
+            <table>
+                <tr><th>Course ID</th><th>Course Name</th></tr>
+                {% for c in courses %}
+                <tr><td>{{c[0]}}</td><td>{{c[1]}}</td></tr>
+                {% endfor %}
+            </table>
+        </div>
+
+        {% elif action == 'view_marks' %}
+        <div class="card">
+            <h2>Academic Transcript</h2>
+            <form method="GET">
+                <input type="hidden" name="action" value="view_marks">
+                <select name="cid" onchange="this.form.submit()">
+                    <option value="">-- Select a Course --</option>
+                    {% for c in courses %}
+                    <option value="{{c[0]}}" {% if selected_cid == c[0] %}selected{% endif %}>{{c[1]}}</option>
+                    {% endfor %}
+                </select>
+            </form>
+
+            {% if selected_cid %}
+            <table>
+                <tr><th>Category</th><th>Obtained Marks</th><th>Grade</th></tr>
+                {% for m in marks %}
+                <tr><td>{{m[0]}}</td><td>{{m[1]}}</td><td><strong>{{m[2]}}</strong></td></tr>
+                {% endfor %}
+            </table>
+            {% endif %}
+        </div>
+
+        {% elif action == 'view_attendance' %}
+        <div class="card">
+            <h2>Attendance Record</h2>
+            <form method="GET">
+                <input type="hidden" name="action" value="view_attendance">
+                <select name="cid" onchange="this.form.submit()">
+                    <option value="">-- Select a Course --</option>
+                    {% for c in courses %}
+                    <option value="{{c[0]}}" {% if selected_cid == c[0] %}selected{% endif %}>{{c[1]}}</option>
+                    {% endfor %}
+                </select>
+            </form>
+
+            {% if selected_cid %}
+            <table>
+                <tr><th>Date</th><th>Status</th></tr>
+                {% for a in attendance %}
+                <tr>
+                    <td>{{a[0]}}</td>
+                    <td class="{{ 'status-present' if a[1] == 'Present' else 'status-absent' }}">{{a[1]}}</td>
+                </tr>
+                {% endfor %}
+            </table>
+            {% endif %}
+        </div>
+
+        {% elif action == 'upcoming_exams' %}
+        <div class="card">
+            <h2>Upcoming Exam Schedule</h2>
+            <table>
+                <tr><th>Course Code</th><th>Exam Type</th><th>Date</th></tr>
+                {% for e in exams %}
+                <tr><td>{{e[2]}}</td><td>{{e[0]}}</td><td>{{e[1]}}</td></tr>
+                {% endfor %}
+            </table>
+        </div>
+
+        {% else %}
+        <div style="text-align: center; margin-top: 100px; color: #555;">
+            <h1>Welcome to the Student Portal</h1>
+            <p>Select an option from the sidebar to view your academic progress.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+</body>
+</html>

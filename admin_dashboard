@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Dashboard</title>
+    <style>
+        body { margin: 0; font-family: sans-serif; background: #f4f7f6; }
+        header { background: #1a2a6c; color: white; padding: 25px 50px; font-size: 1.8rem; font-weight: bold; }
+        .sub-header { background: white; padding: 15px 50px; display: flex; justify-content: space-between; border-bottom: 1px solid #ddd; }
+        .main-layout { display: flex; height: calc(100vh - 145px); }
+        .sidebar { width: 260px; background: #1a2a6c; padding-top: 20px; }
+        .sidebar a { display: block; padding: 12px 25px; color: white; text-decoration: none; font-size: 0.9rem; border-left: 4px solid transparent; }
+        .sidebar a:hover { background: #e6f0ff; color: #1a2a6c; border-left-color: #3498db; }
+        .content { flex: 1; padding: 40px; overflow-y: auto; }
+        .form-card { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); max-width: 600px; }
+        input, select { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background: #1a2a6c; color: white; border: none; cursor: pointer; font-weight: bold; margin-top: 10px; }
+        button:hover { background: #3498db; }
+        .msg { background: #e6f0ff; color: #1a2a6c; padding: 15px; border-radius: 5px; margin-bottom: 20px; border: 1px solid #3498db; }
+        table { width: 100%; border-collapse: collapse; background: white; }
+        th, td { padding: 12px; border: 1px solid #ddd; text-align: left; }
+        th { background: #1a2a6c; color: white; }
+    </style>
+</head>
+<body>
+
+<header>National University of Computing and Emerging Sciences</header>
+<div class="sub-header">
+    <span>ADMINISTRATOR CONTROL PANEL</span>
+    <a href="/logout" style="color:red; font-weight:bold; text-decoration:none;">Logout</a>
+</div>
+
+<div class="main-layout">
+    <div class="sidebar">
+        <a href="/admin_action/add_exam">Add Exam</a>
+        <a href="/admin_action/remove_exam">Remove Exam</a>
+        <a href="/admin_action/add_student">Add Student</a>
+        <a href="/admin_action/remove_student">Remove Student</a>
+        <a href="/admin_action/add_instructor">Add Instructor</a>
+        <a href="/admin_action/remove_instructor">Remove Instructor</a>
+        <a href="/admin_action/add_course">Add Course</a>
+        <a href="/admin_action/remove_course">Remove Course</a>
+        <a href="/admin_action/view_passwords">View Passwords</a>
+    </div>
+
+    <div class="content">
+        {% if message %}<div class="msg">{{ message }}</div>{% endif %}
+
+        {% if action == 'add_exam' %}
+        <div class="form-card">
+            <h2>Schedule New Exam</h2>
+            <form method="POST">
+                <input type="number" name="id" placeholder="Exam ID" min="1" required>
+                    <select name="Type" required>
+                        <option value="Midterm">Midterm</option>
+                        <option value="Final">Final</option>
+                    </select>
+                <input type="date" name="date" required>
+                <select name="c_id" required>
+                    <option value="">-- Select Course --</option>
+                    {% for c in lists.courses %} <option value="{{c[0]}}">{{c[0]}} - {{c[1]}}</option> {% endfor %}
+                </select>
+                <button type="submit">Add Exam</button>
+            </form>
+        </div>
+
+        {% elif action == 'remove_exam' %}
+        <div class="form-card">
+            <h2>Delete Exam</h2>
+            <form method="POST">
+                <select name="id" required>
+                    <option value="">-- Select Exam to Remove --</option>
+                    {% for e in lists.exams %} <option value="{{e[0]}}">ID: {{e[0]}} ({{e[1]}} - {{e[2]}})</option> {% endfor %}
+                </select>
+                <button type="submit" style="background:red;">Delete Exam</button>
+            </form>
+        </div>
+
+        {% elif action == 'add_student' %}
+        <div class="form-card">
+            <h2>Register Student</h2>
+            <form method="POST">
+                <input type="number" name="id" placeholder="ID" min="1" required>
+                <input type="text" name="name" placeholder="Name" required>
+                <input type="email" name="email" placeholder="Email" required>
+                <input type="text" name="phone" placeholder="Phone">
+                
+                <select name="year" required>
+                    <option value="">-- Enrollment Year --</option>
+                    {% for y in range(2020, 2027) %} <option value="{{y}}">{{y}}</option> {% endfor %}
+                </select>
+
+                <select name="program" required>
+                    <option value="">-- Select Program --</option>
+                    {% if lists.programs %}
+                        {% for p in lists.programs %}
+                            <option value="{{p}}">{{p}}</option>
+                        {% endfor %}
+                    {% else %}
+                        <option value="BSCS">BSCS</option>
+                        <option value="BSSE">BSSE</option>
+                        <option value="BSAI">BSAI</option>
+                    {% endif %}
+                </select>
+
+                <select name="type" required>
+                    <option value="UG">Undergraduate</option>
+                    <option value="MS">Masters</option>
+                    <option value="PHD">PHD</option>
+                </select>
+                <input type="text" name="spec" placeholder="Major/Thesis Area" required>
+                <button type="submit">Add Student</button>
+            </form>
+        </div>
+
+        {% elif action == 'remove_student' %}
+        <div class="form-card">
+            <h2>Remove Student</h2>
+            <p style="color: #666;">This will delete all grades, attendance, and enrollment records for this student.</p>
+            <form method="POST">
+                <input type="number" name="id" placeholder="Enter Student ID" min="1" required>
+                <button type="submit" style="background: #c0392b;">Delete Student Permanently</button>
+            </form>
+        </div>
+
+        {% elif action == 'add_instructor' %}
+        <div class="form-card">
+            <h2>Register Instructor</h2>
+            <form method="POST">
+                <input type="number" name="id" placeholder="ID" min="1" required>
+                <input type="text" name="name" placeholder="Name" required>
+                <input type="email" name="email" placeholder="Email">
+                <input type="text" name="phone" placeholder="Phone">
+                <input type="number" name="salary" placeholder="Salary" min="1" required>
+                <input type="text" name="rank" placeholder="Rank">
+                <input type="text" name="block" placeholder="Block">
+                <input type="number" name="floor" placeholder="Floor">
+                <input type="text" name="room" placeholder="Room">
+                <button type="submit">Add Instructor</button>
+            </form>
+        </div>
+
+        {% elif action == 'remove_instructor' %}
+        <div class="form-card">
+            <h2>Delete Instructor</h2>
+            <form method="POST">
+                <select name="id" required>
+                    <option value="">-- Select Instructor to Remove --</option>
+                    {% for i in lists.instructors %} <option value="{{i[0]}}">{{i[1]}} (ID: {{i[0]}})</option> {% endfor %}
+                </select>
+                <button type="submit" style="background:red;">Delete Instructor</button>
+            </form>
+        </div>
+
+        {% elif action == 'add_course' %}
+        <div class="form-card">
+            <h2>Add New Course</h2>
+            <form method="POST">
+                <input type="text" name="id" placeholder="Course ID (e.g. CS101)" required>
+                <input type="text" name="name" placeholder="Course Name" required>
+                <input type="number" name="credits" placeholder="Credits" min="1" required>
+                <select name="dept_no" required>
+                    <option value="">-- Select Department --</option>
+                    {% for d in lists.depts %} <option value="{{d[0]}}">{{d[1]}}</option> {% endfor %}
+                </select>
+                <select name="inst_id" required>
+                    <option value="">-- Select Instructor --</option>
+                    {% for i in lists.instructors %} <option value="{{i[0]}}">{{i[1]}}</option> {% endfor %}
+                </select>
+                <button type="submit">Add Course</button>
+            </form>
+        </div>
+
+        {% elif action == 'remove_course' %}
+        <div class="form-card">
+            <h2>Delete Course</h2>
+            <form method="POST">
+                <select name="id" required>
+                    <option value="">-- Select Course to Remove --</option>
+                    {% for c in lists.courses %} <option value="{{c[0]}}">{{c[1]}} ({{c[0]}})</option> {% endfor %}
+                </select>
+                <button type="submit" style="background:red;">Delete Course</button>
+            </form>
+        </div>
+
+        {% elif action == 'view_passwords' %}
+        <h2>User Logins</h2>
+        <table>
+            <tr><th>Username</th><th>Password</th><th>Role</th><th>Ref ID</th></tr>
+            {% for r in data %} <tr><td>{{r[0]}}</td><td>{{r[1]}}</td><td>{{r[2]}}</td><td>{{r[3]}}</td></tr> {% endfor %}
+        </table>
+
+        {% else %}
+        <h2>Welcome Admin</h2>
+        <p>Select a task from the sidebar.</p>
+        {% endif %}
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Instructor Dashboard - NUCES</title>
+    <style>
+        body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f7f6; }
+        header { background: #1a2a6c; color: white; padding: 25px 50px; font-size: 1.8rem; font-weight: bold; }
+        .sub-header { background: white; padding: 15px 50px; display: flex; justify-content: space-between; border-bottom: 1px solid #ddd; }
+        .main-layout { display: flex; height: calc(100vh - 145px); }
+        
+        /* Sidebar Styling */
+        .sidebar { width: 260px; background: #1a2a6c; padding-top: 20px; }
+        .sidebar a { display: block; padding: 15px 25px; color: white; text-decoration: none; font-size: 0.9rem; border-left: 4px solid transparent; transition: 0.3s; }
+        .sidebar a:hover { background: #e6f0ff; color: #1a2a6c; border-left-color: #3498db; }
+        
+        /* Content Area */
+        .content { flex: 1; padding: 40px; overflow-y: auto; }
+        .form-card { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); max-width: 850px; margin: auto; }
+        
+        /* Form Elements */
+        h2, h3 { color: #1a2a6c; margin-top: 0; }
+        label { display: block; margin-top: 10px; font-weight: bold; color: #555; }
+        input, select { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; font-size: 1rem; }
+        button { width: 100%; padding: 12px; background: #27ae60; color: white; border: none; cursor: pointer; font-weight: bold; font-size: 1rem; margin-top: 20px; border-radius: 5px; }
+        button:hover { background: #219150; }
+        
+        /* Table Styling */
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; background: white; }
+        th, td { padding: 12px; border: 1px solid #ddd; text-align: left; }
+        th { background-color: #f8f9fa; color: #1a2a6c; }
+        tr:nth-child(even) { background-color: #f2f2f2; }
+
+        .msg { background: #e6f0ff; color: #1a2a6c; padding: 15px; border-radius: 5px; margin-bottom: 20px; border: 1px solid #3498db; text-align: center; }
+    </style>
+</head>
+<body>
+
+<header>National University of Computing and Emerging Sciences</header>
+<div class="sub-header">
+    <span>INSTRUCTOR PORTAL: <strong>{{ session.username }}</strong></span>
+    <a href="/logout" style="color:red; font-weight:bold; text-decoration:none;">Logout</a>
+</div>
+
+<div class="main-layout">
+    <div class="sidebar">
+        <a href="{{ url_for('instructor_action', action='mark_attendance') }}">Mark Attendance</a>
+        <a href="{{ url_for('instructor_action', action='upload_grades') }}">Upload Grades & Marks</a>
+        <a href="{{ url_for('instructor_action', action='view_records') }}" style="background: #2c3e50;">View Course Records</a>
+    </div>
+
+    <div class="content">
+        {% if message %}<div class="msg">{{ message }}</div>{% endif %}
+
+        {% if action == 'mark_attendance' or action == 'upload_grades' %}
+        <div class="form-card">
+            <h2>{{ action.replace('_', ' ').upper() }}</h2>
+            
+            <form method="GET" action="/instructor_action/{{action}}">
+                <label>Select Course</label>
+                <select name="cid" onchange="this.form.submit()" required>
+                    <option value="">-- Choose Course --</option>
+                    {% for c in courses %}
+                    <option value="{{c[0]}}" {% if selected_cid == c[0] %}selected{% endif %}>{{c[1]}} ({{c[0]}})</option>
+                    {% endfor %}
+                </select>
+            </form>
+
+            {% if selected_cid %}
+            <form method="POST" style="margin-top:20px;">
+                <input type="hidden" name="cid" value="{{selected_cid}}">
+                
+                <label>Select Student</label>
+                <select name="sid" required>
+                    <option value="">-- Choose Student --</option>
+                    {% for s in students %}
+                    <option value="{{s[0]}}">{{s[1]}} (ID: {{s[0]}})</option>
+                    {% endfor %}
+                </select>
+
+                {% if action == 'mark_attendance' %}
+                    <label>Date</label>
+                    <input type="date" name="date" required>
+                    <label>Status</label>
+                    <select name="status" required>
+                        <option value="Present">Present</option>
+                        <option value="Absent">Absent</option>
+                    </select>
+                {% else %}
+                    <label>Select Exam</label>
+                    <select name="eid" required>
+                        <option value="">-- Choose Exam --</option>
+                        {% for e in exams %}
+                        <option value="{{e[0]}}">{{e[1]}}</option>
+                        {% endfor %}
+                    </select>
+                    <label>Marks (0-100)</label>
+                    <input type="number" name="marks" min="0" max="100" required>
+                    <label>Grade</label>
+                    <select name="grade" required>
+                        {% for g in ['A', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D', 'D-', 'F'] %}
+                        <option value="{{g}}">{{g}}</option>
+                        {% endfor %}
+                    </select>
+                {% endif %}
+                <button type="submit">Save Record</button>
+            </form>
+            {% endif %}
+        </div>
+
+        {% elif action == 'view_records' %}
+        <div class="form-card">
+            <h2>VIEW STUDENT RECORDS</h2>
+            <form method="GET" action="/instructor_action/view_records">
+                <label>Select Course to View</label>
+                <select name="cid" onchange="this.form.submit()" required>
+                    <option value="">-- Choose Course --</option>
+                    {% for c in courses %}
+                    <option value="{{c[0]}}" {% if selected_cid == c[0] %}selected{% endif %}>{{c[1]}}</option>
+                    {% endfor %}
+                </select>
+            </form>
+
+            {% if selected_cid %}
+                <hr style="margin: 30px 0; border: 0; border-top: 1px solid #eee;">
+                
+                <h3>Attendance History</h3>
+                {% if view_data.attendance %}
+                <table>
+                    <thead>
+                        <tr><th>Student Name</th><th>Date</th><th>Status</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for row in view_data.attendance %}
+                        <tr><td>{{row[0]}}</td><td>{{row[1]}}</td><td>{{row[2]}}</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}<p>No attendance records found.</p>{% endif %}
+
+                <h3 style="margin-top: 40px;">Academic Performance (Marks/Grades)</h3>
+                {% if view_data.grades %}
+                <table>
+                    <thead>
+                        <tr><th>Student Name</th><th>Exam Type</th><th>Marks</th><th>Grade</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for row in view_data.grades %}
+                        <tr><td>{{row[0]}}</td><td>{{row[1]}}</td><td>{{row[2]}}</td><td><strong>{{row[3]}}</strong></td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}<p>No grade records found.</p>{% endif %}
+            {% endif %}
+        </div>
+
+        {% else %}
+        <div style="text-align: center; margin-top: 100px;">
+            <h1>Welcome, Dr. {{ session.username }}</h1>
+            <p>Use the sidebar to manage your student attendance and academic grading.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+</body>
+</html>

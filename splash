@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>University Portal - NUCES</title>
+    <style>
+        body, html {
+            margin: 0; padding: 0; height: 100%; overflow: hidden;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        header {
+        background-color: rgba(26, 42, 108, 0.9);
+        color: white;
+        padding: 25px 50px; /* Increased padding for more width/height feel */
+        font-size: 1.8rem;   /* Larger font */
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;        /* Ensures it hits both edges */
+        box-sizing: border-box; /* Crucial: includes padding in width calculation */
+        z-index: 10;
+        letter-spacing: 1px;
+    }
+
+        /* Video Background */
+        #bg-video {
+            position: fixed;
+            right: 0; bottom: 0;
+            min-width: 100%; min-height: 100%;
+            z-index: -1;
+            filter: brightness(60%); /* Makes the video slightly darker/faded */
+        }
+
+        .content-wrapper {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        h1 {
+            color: white;
+            margin-bottom: 50px;
+            font-size: 3.5rem;
+            text-shadow: 2px 2px 10px rgba(0,0,0,0.5);
+        }
+
+        .container { display: flex; gap: 40px; }
+
+        .box {
+            width: 220px; height: 220px;
+            background: rgba(255, 255, 255, 0.1); /* Glassmorphism effect */
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-radius: 20px;
+            display: flex; align-items: center; justify-content: center;
+            text-decoration: none; font-weight: bold; font-size: 1.3rem;
+            color: white; transition: all 0.4s ease;
+        }
+
+        .box:hover {
+            background-color: #e6f0ff; /* Light Navy Blue */
+            color: #1a2a6c;
+            transform: translateY(-15px);
+            border-color: #e6f0ff;
+        }
+    </style>
+</head>
+<body>
+
+    <header>National University of Computing and Emerging Sciences</header>
+
+    <video autoplay muted loop id="bg-video">
+        <source src="{{ url_for('static', filename='campus_video.mp4') }}" type="video/mp4">
+    </video>
+
+    <div class="content-wrapper">
+        <h1>UNIVERSITY PORTAL</h1>
+        <div class="container">
+            <a href="/login/ADMIN" class="box">ADMINISTRATOR</a>
+            <a href="/login/INSTRUCTOR" class="box">INSTRUCTOR</a>
+            <a href="/login/STUDENT" class="box">STUDENT</a>
+        </div>
+    </div>
+
+</body>
+</html>
